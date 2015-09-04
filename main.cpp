@@ -1,6 +1,8 @@
-#include <iostream>
+#include "painter.h"
 
-int main(int argc, char **argv) {
-    std::cout << "Hello, world!" << std::endl;
-    return 0;
+int main() {
+  Painter pntr;
+  pntr.init();
+  pntr.DrawQuad();
+  return 0;
 }
