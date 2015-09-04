@@ -1,0 +1,4 @@
+[Project]
+Name=glsltest
+Manager=KDevCMakeManager
+VersionControl=kdevgit
