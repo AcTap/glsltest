@@ -31,23 +31,23 @@ void Painter::init(int width,int height)
   //shaders
   GLuint vertex=glCreateShader(GL_VERTEX_SHADER); 
   GLuint fragment=glCreateShader(GL_FRAGMENT_SHADER); 
-  GLchar* vertShader;
-  GLchar* fragShader;
+  GLchar** vertShader;
+  GLchar** fragShader;
   
-  if (loadshader("glsltest.vert",&vertShader,0){
+  if (loadshader("glsltest.vert",vertShader)){
       exit(1);
   }
     
-  if (loadshader("glsltest.frag",&fragShader,0){ 
+  if (loadshader((char*)"glsltest.frag",fragShader)){ 
       exit(1);
   }
   glShaderSource(vertex, 1,vertShader, NULL);
   glShaderSource(fragment, 1,fragShader, NULL);
   glCompileShader(vertex);
   glCompileShader(fragment);
-  GLProgramm= glCreateProgram();
+  GLProgramm = glCreateProgram();
   glAttachShader(GLProgramm,vertex);
-  glAttachShader(GlProgramm,fragment);
+  glAttachShader(GLProgramm,fragment);
     glLinkProgram(GLProgramm);
     glUseProgram(GLProgramm);
 

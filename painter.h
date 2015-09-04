@@ -2,7 +2,7 @@
 #define _PAINTER_H
 
 #include <SDL2/SDL.h> // Библиотека SDL 2
-#include <GL/gl.h> // Библиотека OpenGL
+#include <GL/glew.h>
 #include <GL/glu.h> // Библиотека GLU
 #include <iostream> // стандартная библиотека ввода-вывода в C++
 #include <fstream>

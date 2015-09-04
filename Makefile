@@ -1,6 +1,6 @@
 CPP=g++
 CPPFLAGS=-Wall -std=c++11
-LDFLAGS=-lSDL2 -lGL -lGLU -lstdc++
+LDFLAGS=-lSDL2 -lGL -lGLU -lGLEW -lstdc++
 OBJECTS=main.o painter.o
 NAME=bin/glsltest
 
