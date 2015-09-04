@@ -2,7 +2,7 @@
 
 int main() {
   Painter pntr;
-  pntr.init();
-  pntr.DrawQuad();
+  pntr.init(600,600);
+  pntr.start();
   return 0;
 }

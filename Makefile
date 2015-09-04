@@ -1,14 +1,14 @@
 CPP=g++
-CPPFLAGS=-Wall -std=c++11 -pedantic
-LDFLAGS=- -lX11 -lGL -lGLU
+CPPFLAGS=-Wall -std=c++11
+LDFLAGS=-lSDL2 -lGL -lGLU -lstdc++
 OBJECTS=main.o painter.o
-NAME=glsltest
+NAME=bin/glsltest
 
 $(NAME) : $(OBJECTS)
 	$(CPP) $(CPPFLAGS) $(LDFLAGS) -o $(NAME) $(OBJECTS)
 
-main.o : main.cpp
+main.o : main.cpp painter.h
 	$(CPP) $(CPPFLAGS) $(LDFLAGS) -c main.cpp
 
-painter.o : painter.cpp
+painter.o : painter.cpp painter.h
 	$(CPP) $(CPPFLAGS) $(LDFLAGS) -c painter.cpp
