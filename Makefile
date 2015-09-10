@@ -1,14 +1,13 @@
-CPP=g++
-CPPFLAGS=-Wall -std=c++11
-LDFLAGS=-lSDL2 -lGL -lGLU -lGLEW -lstdc++
-OBJECTS=main.o painter.o
-NAME=bin/glsltest
+CC=clang
+CFLAGS=-Wall -std=c++11 -Wunused-variable -I.
+LDFLAGS=-lSDL2 -lGL -lGLU -lX11 -lGLEW -lstdc++
+DEPS=painter.h
+SOURCES=main.cpp painter.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
+EXECUTABLE=bin/glsltest
 
-$(NAME) : $(OBJECTS)
-	$(CPP) $(CPPFLAGS) $(LDFLAGS) -o $(NAME) $(OBJECTS)
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $^ $(LDFLAGS) -o $@
 
-main.o : main.cpp painter.h
-	$(CPP) $(CPPFLAGS) $(LDFLAGS) -c main.cpp
-
-painter.o : painter.cpp painter.h
-	$(CPP) $(CPPFLAGS) $(LDFLAGS) -c painter.cpp
+%.o: %.cpp $(DEPS)
+	$(CC) $< -c -o $@ $(CFLAGS) 
