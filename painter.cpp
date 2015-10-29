@@ -144,12 +144,12 @@ int Painter::start()
   DrawFraq();
   while(running){ 
     SDL_Event event; // события SDL
+    double step=0.1*scale;
     while ( SDL_PollEvent(&event) ){ // начинаем обработку событий
       switch(event.type){ // смотрим:
       case SDL_QUIT: // если произошло событие закрытия окна, то завершаем работу программы
 	running = false;
 	break;
-	
       case SDL_KEYDOWN: // если нажата клавиша
 	switch(event.key.keysym.sym){ // смотрим какая
 	case SDLK_ESCAPE: // клавиша ESC
@@ -157,31 +157,31 @@ int Painter::start()
 	  break;
 	case SDLK_LEFTBRACKET:
 	  scale*=1.1;
-	  //std::cout<<scale<<"\n";
+	  std::cout<<scale<<"\n";
 	  DrawFraq();
 	  break;
 	case SDLK_RIGHTBRACKET:
 	  scale*=0.9;
-	  //std::cout<<scale<<"\n";
+	  std::cout<<scale<<"\n";
 	  DrawFraq();
 	  break;
 	case SDLK_d:
-	  xcenter-=0.1;
+	  xcenter-=step;
 	  //std::cout<<xcenter<<"\n";
 	  DrawFraq();
 	  break;
 	case SDLK_a:
-	  xcenter+=0.1;
+	  xcenter+=step;
 	  //std::cout<<xcenter<<"\n";
 	  DrawFraq();
 	  break;
 	case SDLK_w:
-	  ycenter-=0.1;
+	  ycenter-=step;
 	  //std::cout<<ycenter<<"\n";
 	  DrawFraq();
 	  break;
 	case SDLK_s:
-	  ycenter+=0.1;
+	  ycenter+=step;
 	  //std::cout<<ycenter<<"\n";
 	  DrawFraq();
 	  break;
@@ -212,20 +212,12 @@ void Painter::DrawFraq()
   //std::cout<<"BindBuf"<<"\n";
   glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
   //
-  cube=new GLfloat*[winH*winW];
-  //GLfloat cube[winH*winW][2];
-  float step=6.0/(winH-1);
-  //GLfloat colors[winH*winW*4][3];
-  int counter=0;
-  for (float i=3.0;i>=-3.0;i-=step){
-      for (float k=-3.0;k<=3.0 && counter<winH*winW;k+=step){
-	cube[counter]=new GLfloat[2];
-	cube[counter][0]=k;
-	cube[counter++][1]=i; 
-      }
-      //std::cout<<std::endl;
-  }
-  //
+  //cube=new GLfloat*[winH*winW];
+  GLfloat cube[6][2]={
+    {-3.0,3.0},{3.0,3.0},{3.0,-3.0},
+    {-3.0,3.0},{3.0,-3.0},{-3.0,-3.0}
+  };
+
   // Передаем вершины в буфер
   //std::cout<<"BufData"<<"\n";
   glBufferData(GL_ARRAY_BUFFER, sizeof(cube), nullptr, GL_STATIC_DRAW);
@@ -233,19 +225,24 @@ void Painter::DrawFraq()
   //glBufferSubData(GL_ARRAY_BUFFER,sizeof(cube),sizeof(colors),colors);
   //std::cout<<"draw"<<"\n";
   GLuint a_Vertex=glGetAttribLocation(GLProgramm,"a_Vertex");
-  GLuint pxcen=glGetUniformLocation(GLProgramm,"xcenter");
-  GLuint pycen=glGetUniformLocation(GLProgramm,"ycenter");
-  GLuint pscale=glGetUniformLocation(GLProgramm,"scale");
+  GLuint data=glGetUniformLocation(GLProgramm,"data");
+  //GLuint pxcen=glGetUniformLocation(GLProgramm,"xcenter");
+  //GLuint pycen=glGetUniformLocation(GLProgramm,"ycenter");
+  //GLuint pscale=glGetUniformLocation(GLProgramm,"scale");
   //GLuint  a_color=glGetAttribLocation(GLProgramm,"a_color");
   //std::cout<<a_Vertex<<" location"<<"\n";
   glVertexAttribPointer(a_Vertex, 2, GL_FLOAT,GL_FALSE, 0, BUFFER_OFFSET(0));
   glEnableVertexAttribArray(a_Vertex);
-  glUniform1f(pxcen,xcenter);
-  glUniform1f(pycen,ycenter);
-  glUniform1f(pscale,scale);
+  GLfloat Data[3]={xcenter,ycenter,scale};
+//   glUniform1f(pxcen,xcenter);
+//   glUniform1f(pycen,ycenter);
+//   glUniform1f(pscale,scale);
+  glUniform3fv(data,1,Data);
 //   glVertexAttrbPo;inter(a_color, 3, GL_FLOAT,GL_FALSE, 0, BUFFER_OFFSET(sizeof(cube)));
 //   glEnableVertexAttribArray(a_color);
-  glDrawArrays(GL_POINTS, 0, winH*winW);
+  //time_t time1=std::clock();
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+  //std::cout<<std::clock()-time1<<std::endl;
   freeVBO(VBOs[0]);
 }
 

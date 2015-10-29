@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <ctime>
 using std::string;
 using std::ifstream;
 using std::ios;
@@ -22,7 +23,6 @@ class Painter{
   int start();
   void DrawFraq();
   ~Painter();
-  GLfloat **cube;
  private:
   SDL_Window *window;
   GLuint      winH;
