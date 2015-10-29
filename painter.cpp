@@ -1,5 +1,4 @@
 #include "painter.h"
-
 unsigned long  Painter::getFileLength(ifstream& file)
 {
     if(!file.good()) return 0;
@@ -51,7 +50,9 @@ void Painter::init(unsigned int width,unsigned int height)
 {
   winW=width;
   winH=height;
-
+  scale=1;
+  xcenter=0;
+  ycenter=0;
   if ( SDL_Init(SDL_INIT_VIDEO) < 0 ){ 
     std::cout << "Unable to init SDL, error: " << SDL_GetError() << std::endl;
     exit(1);
@@ -62,19 +63,18 @@ void Painter::init(unsigned int width,unsigned int height)
   SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
   SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
   SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-  // Создаем окно с заголовком "Cube", размером 640х480 и расположенным по центру экрана.
-  window = SDL_CreateWindow("GLSLtest", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+  window = SDL_CreateWindow("Mandelbrot", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
   //std::cout<<"wtf"<<"\n";
   glcontext = SDL_GL_CreateContext(window); // создаем контекст OpenGL
-  //std::cout<<"that's it"<<"\n";
+  //sstd::cout<<"that's it"<<"\n";
   if(window == nullptr){	// если не получилось создать окно, то выходим
  	exit(1);
   }
-//  std::cout<<"Shaders?"<<"\n";
   //shaders
   GLenum err = glewInit();
   if (err != GLEW_OK)
     exit(1); // or handle the error in a nicer way
+  
   if (!GLEW_VERSION_2_1)  // check that the machine supports the 2.1 API.
     exit(1); // or handle the error in a nicer way
   GLuint vertex=glCreateShader(GL_VERTEX_SHADER); 
@@ -93,7 +93,7 @@ void Painter::init(unsigned int width,unsigned int height)
       glGetShaderiv(vertex,GL_INFO_LOG_LENGTH,&err);
       char *infoLog=new char[err];
       glGetShaderInfoLog(vertex, err,nullptr,infoLog);
-      std::cerr<<infoLog<<" in vertex"<<"\n";
+      std::cout<<infoLog<<" in vertex"<<"\n";
       exit(1);
   }
   glCompileShader(fragment);
@@ -103,7 +103,7 @@ void Painter::init(unsigned int width,unsigned int height)
       glGetShaderiv(fragment,GL_INFO_LOG_LENGTH,&err);
       char *infoLog=new char[err];
       glGetShaderInfoLog(fragment, err,nullptr,infoLog);
-      std::cerr<<infoLog<<" in fragment"<<"\n";
+      std::cout<<infoLog<<" in fragment"<<"\n";
       exit(1);
   }
 
@@ -122,29 +122,28 @@ void Painter::init(unsigned int width,unsigned int height)
       std::cerr<<infoLog<<"\n";
       exit(1);
   }
+  
   glUseProgram(GLProgramm);
-
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // устанавливаем фоновый цвет на черный
   glClearDepth(1.0);
-  glDepthFunc(GL_LESS);
-  glEnable(GL_DEPTH_TEST); // включаем тест глубины
+  //glDepthFunc(GL_LESS);
+  //glEnable(GL_DEPTH_TEST); // включаем тест глубины
   glShadeModel(GL_SMOOTH);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(45.0f, (float) width / (float) height, 0.1f, 100.0f); // настраиваем трехмерную перспективу
+  glOrtho(-3.0,3.0, -3.0, 3.0,1.0f,-1.0f); // настраиваем трехмерную перспективу
   glMatrixMode(GL_MODELVIEW); // переходим в трехмерный режим
+
 }
 
 int Painter::start()
 {
   bool running = true;
-
-  float xrf = 0, yrf = 0, zrf = 0; // углы поворота
-
+  
+ // float xrf = 0, yrf = 0, zrf = 0; // углы поворота
+  DrawFraq();
   while(running){ 
-    
     SDL_Event event; // события SDL
-    
     while ( SDL_PollEvent(&event) ){ // начинаем обработку событий
       switch(event.type){ // смотрим:
       case SDL_QUIT: // если произошло событие закрытия окна, то завершаем работу программы
@@ -156,19 +155,40 @@ int Painter::start()
 	case SDLK_ESCAPE: // клавиша ESC
 	  running = false; // завершаем работу программы
 	  break;
-					}
+	case SDLK_LEFTBRACKET:
+	  scale*=1.1;
+	  //std::cout<<scale<<"\n";
+	  DrawFraq();
+	  break;
+	case SDLK_RIGHTBRACKET:
+	  scale*=0.9;
+	  //std::cout<<scale<<"\n";
+	  DrawFraq();
+	  break;
+	case SDLK_d:
+	  xcenter-=0.1;
+	  //std::cout<<xcenter<<"\n";
+	  DrawFraq();
+	  break;
+	case SDLK_a:
+	  xcenter+=0.1;
+	  //std::cout<<xcenter<<"\n";
+	  DrawFraq();
+	  break;
+	case SDLK_w:
+	  ycenter-=0.1;
+	  //std::cout<<ycenter<<"\n";
+	  DrawFraq();
+	  break;
+	case SDLK_s:
+	  ycenter+=0.1;
+	  //std::cout<<ycenter<<"\n";
+	  DrawFraq();
+	  break;
+	}
 	break;
       } 
     }
-    
-    // пока программа запущена изменяем углы поворота, тем самым вращая куб
-    
-    xrf -= 0.5; 
-    yrf -= 0.5;
-    zrf -= 0.5;
-    
-    DrawCube(xrf, yrf, zrf); // рисуем сам куб с текущими углами поворота		
-    // обновляем экран
     glFlush();
     SDL_GL_SwapWindow(window);
   }
@@ -180,58 +200,53 @@ int Painter::start()
 
 
 
-void Painter::DrawCube(float xrf, float yrf, float zrf)
+void Painter::DrawFraq()
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);//| GL_DEPTH_BUFFER_BIT);
   
   glLoadIdentity();
-  glTranslatef(0.0f, 0.0f, -7.0f);	// Сдвинуть вглубь экрана
-  glRotatef(xrf, 1.0f, 0.0f, 0.0f);	// Вращение куба по X, Y, Z
-  glRotatef(yrf, 0.0f, 1.0f, 0.0f);	// Вращение куба по X, Y, Z
-  glRotatef(zrf, 0.0f, 0.0f, 1.0f);	// Вращение куба по X, Y, Z
   GLuint VBOs[2];
   //std::cout<<"GenBuf"<<"\n";
+  
   glGenBuffers(2, VBOs);
   //std::cout<<"BindBuf"<<"\n";
   glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
-  // Вершины нашего треугольника
-  //std::cout<<"trig"<<"\n";
-  GLfloat cube[24][3] = {
-      {0,0,0},{1,0,0},{0.5,1,0.5},
-      {0,0,0},{0,0,1},{0.5,1,0.5},
-      {1,0,0},{1,0,1},{0.5,1,0.5},
-      {0,0,1},{1,0,1},{0.5,1,0.5},
-
-      {0,0,0},{1,0,0},{0.5,-1,0.5},
-      {0,0,0},{0,0,1},{0.5,-1,0.5},
-      {1,0,0},{1,0,1},{0.5,-1,0.5},
-      {0,0,1},{1,0,1},{0.5,-1,0.5}
-  };
-  GLfloat colors[24][3]={
-      {1,0,0},{0,1,0},{0,0,1},
-      {1,0,0},{1,0,1},{0,0,1},
-      {0,1,0},{1,1,0},{0,0,1},
-      {1,0,1},{1,1,0},{0,0,1},
-
-      {1,0,0},{0,1,0},{0,1,1},
-      {1,0,0},{1,0,1},{0,1,1},
-      {0,1,0},{1,1,0},{0,1,1},
-      {1,0,1},{1,1,0},{0,1,1}
-  };
+  //
+  //cube=new GLfloat*[winH*winW];
+  GLfloat cube[winH*winW][2];
+  float step=6.0/(winH-1);
+  //GLfloat colors[winH*winW*4][3];
+  int counter=0;
+  for (float i=3.0;i>=-3.0;i-=step){
+      for (float k=-3.0;k<=3.0 && counter<winH*winW;k+=step){
+	//cube[counter]=new GLfloat[2];
+	cube[counter][0]=k;
+	cube[counter++][1]=i; 
+      }
+      //std::cout<<std::endl;
+  }
+  //
   // Передаем вершины в буфер
   //std::cout<<"BufData"<<"\n";
-  glBufferData(GL_ARRAY_BUFFER, sizeof(cube)+sizeof(colors), nullptr, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cube), nullptr, GL_STATIC_DRAW);
   glBufferSubData(GL_ARRAY_BUFFER,0,sizeof(cube),cube);
-  glBufferSubData(GL_ARRAY_BUFFER,sizeof(cube),sizeof(colors,colors),colors);
+  //glBufferSubData(GL_ARRAY_BUFFER,sizeof(cube),sizeof(colors),colors);
   //std::cout<<"draw"<<"\n";
   GLuint a_Vertex=glGetAttribLocation(GLProgramm,"a_Vertex");
-  GLuint  a_color=glGetAttribLocation(GLProgramm,"a_color");
+  GLuint pxcen=glGetUniformLocation(GLProgramm,"xcenter");
+  GLuint pycen=glGetUniformLocation(GLProgramm,"ycenter");
+  GLuint pscale=glGetUniformLocation(GLProgramm,"scale");
+  //GLuint  a_color=glGetAttribLocation(GLProgramm,"a_color");
   //std::cout<<a_Vertex<<" location"<<"\n";
-  glVertexAttribPointer(a_Vertex, 3, GL_FLOAT,GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(a_Vertex, 2, GL_FLOAT,GL_FALSE, 0, BUFFER_OFFSET(0));
   glEnableVertexAttribArray(a_Vertex);
-  glVertexAttribPointer(a_color, 3, GL_FLOAT,GL_FALSE, 0, BUFFER_OFFSET(sizeof(cube)));
-  glEnableVertexAttribArray(a_color);
-  glDrawArrays(GL_TRIANGLES, 0, 24);
+  glUniform1f(pxcen,xcenter);
+  glUniform1f(pycen,ycenter);
+  glUniform1f(pscale,scale);
+//   glVertexAttrbPo;inter(a_color, 3, GL_FLOAT,GL_FALSE, 0, BUFFER_OFFSET(sizeof(cube)));
+//   glEnableVertexAttribArray(a_color);
+  glDrawArrays(GL_POINTS, 0, winH*winW);
+  freeVBO(VBOs[0]);
 }
 
 void Painter::freeShader()
