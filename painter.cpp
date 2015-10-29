@@ -212,14 +212,14 @@ void Painter::DrawFraq()
   //std::cout<<"BindBuf"<<"\n";
   glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
   //
-  //cube=new GLfloat*[winH*winW];
-  GLfloat cube[winH*winW][2];
+  cube=new GLfloat*[winH*winW];
+  //GLfloat cube[winH*winW][2];
   float step=6.0/(winH-1);
   //GLfloat colors[winH*winW*4][3];
   int counter=0;
   for (float i=3.0;i>=-3.0;i-=step){
       for (float k=-3.0;k<=3.0 && counter<winH*winW;k+=step){
-	//cube[counter]=new GLfloat[2];
+	cube[counter]=new GLfloat[2];
 	cube[counter][0]=k;
 	cube[counter++][1]=i; 
       }

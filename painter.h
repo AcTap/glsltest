@@ -22,6 +22,7 @@ class Painter{
   int start();
   void DrawFraq();
   ~Painter();
+  GLfloat **cube;
  private:
   SDL_Window *window;
   GLuint      winH;
@@ -31,7 +32,6 @@ class Painter{
   GLfloat     ycenter;
   GLuint     GLProgramm;
   SDL_GLContext glcontext;
-  GLfloat **cube;
   void unloadshader(GLchar **ShaderSource);
   string loadshader(string filename);
   unsigned long getFileLength(ifstream &file);
