@@ -124,23 +124,21 @@ void Painter::init(unsigned int width,unsigned int height)
   }
   
   glUseProgram(GLProgramm);
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // устанавливаем фоновый цвет на черный
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f); 
   glClearDepth(1.0);
   //glDepthFunc(GL_LESS);
-  //glEnable(GL_DEPTH_TEST); // включаем тест глубины
+  //glEnable(GL_DEPTH_TEST); 
   glShadeModel(GL_SMOOTH);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-3.0,3.0, -3.0, 3.0,1.0f,-1.0f); // настраиваем трехмерную перспективу
-  glMatrixMode(GL_MODELVIEW); // переходим в трехмерный режим
+  glOrtho(-3.0*winH/winW,3.0*winH/winW, -3.0, 3.0,1.0f,-1.0f); 
+  glMatrixMode(GL_MODELVIEW); 
 
 }
 
 int Painter::start()
 {
   bool running = true;
-  
- // float xrf = 0, yrf = 0, zrf = 0; // углы поворота
   DrawFraq();
   while(running){ 
     SDL_Event event; // события SDL
@@ -187,6 +185,9 @@ int Painter::start()
 	  break;
 	}
 	break;
+	
+	case SDL_MOUSEBUTTONDOWN:
+	  break;
       } 
     }
     glFlush();
@@ -197,9 +198,6 @@ int Painter::start()
   return 0;
   
 }
-
-
-
 void Painter::DrawFraq()
 {
   glClear(GL_COLOR_BUFFER_BIT);//| GL_DEPTH_BUFFER_BIT);
